@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+  <head>
+    <meta charset="utf-8">
+    <title></title>
+
+    <style>
+      .inflatable {
+        width: 80px;
+        height: 100px;
+        background-color: darkgoldenrod;
+        border-radius: 60%;
+        border: black solid;
+      }
+
+      .knot {
+        width: 0;
+        height: 0;
+        border-left: 5px solid transparent;
+        border-right: 5px solid transparent;
+        border-bottom: 5px solid #b8860b;
+        margin-left: 40px;
+      }
+
+      /* .inner-knot {
+          possition: relative;
+          top: -2 px;
+          right: 0px;
+          width: 0;
+          height: 0;
+          border-left: 8px solid transparent;
+          border-right: 8px solid transparent;
+          border-bottom: 8px solid blue;
+      } */
+
+      .string{
+        width: 1px;
+        height: 100px;
+        background-color: black;
+        margin-left: 45px;
+      }
+
+      .balloon{
+        position: absolute;
+        bottom: 0;
+      }
+
+      .scoreboard {
+        font-size: 20px;
+        position: absolute;
+        bottom: 10px;
+        width: 100%;
+        text-align: center;
+        size: 10;
+      }
+
+      .scoreboard .replay,
+      .scoreboard .label {
+        visibility: hidden;
+      }
+
+      .scoreboard.ready {
+        top: 50%;
+      }
+
+      .scoreboard.ready .replay,
+      .scoreboard.ready .label {
+        visibility: visible;
+      }
+
+      .scoreboard .replay {
+        border: 1px solid #f33;
+        padding: 2px;
+        border-radius: 2.5px;
+        font-size: 17.5px;
+        color: #fff;
+        text-decoration: none;
+        background: #f66;
+        display: block;
+        margin: 5px;
+        size: 10;
+      }
+
+      .scoreboard.ready .badge {
+        width: 175px;
+        height: 75px;
+        padding: 7.5px;
+        margin: 0px auto;
+        border-radius: 7.5px;
+        border: 2px solid #fff;
+        background-color: rgba(37, 120, 144, 0.62);
+        box-shadow: 5px 5px 2.5px rgba(0, 0, 0, 0.62);
+        size: 10;
+      }
+
+    </style>
+  </head>
+
+  <body>
+    <div class="scoreboard">
+      <div class="badge">
+        <span class="label">Your Score:</span>
+        <div class="counter">0</div>
+        <a href="#" class="replay">Replay</a>
+      </div>
+    </div>
+    <div class="balloon">
+      <div class="inflatable"></div>
+      <div class="knot"></div>
+      <div class="string"></div>
+    </div>
+
+
+
+  </body>
+
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.2.4/jquery.min.js"></script>
+
+  <script>
+
+    var balloon = $(".balloon");
+    var counter = 1;
+    var previousPosition = 0;
+    var totalBalloons = 10;
+    for (var i = 0; i < totalBalloons; i++){
+      var balloonCopy = balloon.clone();
+      previousPosition += ($(window).width() / totalBalloons)-40;
+      var hexColour = '#' + (function co(lor){
+        var hexOptions = [0,1,2,3,4,5,6,7,8,9,'a','b','c','d','e','f'];
+        var hexNum = hexOptions[Math.floor(Math.random()*16)];
+        return (lor += hexNum) && (lor.length==6) ? lor : co(lor);
+
+      })('');
+
+      var $inflatable = $(balloonCopy).find('.inflatable');
+      var $knot = $(balloonCopy).find('.knot');
+
+      $inflatable.css({
+        backgroundColor: `${hexColour}`
+      });
+
+      $knot.css({
+        "border-bottom": `10px solid ${hexColour}`
+      })
+
+      balloonCopy.css({
+        left: previousPosition + $(window).width() / totalBalloons
+      });
+
+      console.log($(window).width());
+      balloonCopy.appendTo("body");
+      animateDiv(balloonCopy);
+
+      balloonCopy.click(function(){
+        $(this).remove();
+        counter += 10;
+        $(".counter").html(counter-1);
+      });
+
+      function makeNewPosition(){
+
+        // Get viewport dimensions (remove the dimension of the div)
+        var h = $(window).height() - 50;
+        var w = $(window).width() - 50;
+
+        var nh = Math.floor(Math.random() * h);
+        var nw = Math.floor(Math.random() * w);
+
+        return [nh,nw];
+
+      }
+
+      function calcSpeed(prev, next, counter) {
+        //
+        // var x = Math.abs(prev[1] - next[1]);
+        // var y = Math.abs(prev[0] - next[0]);
+        //
+        // var greatest = x > y ? x : y;
+        //
+        // var speedModifier = 0.03 * (counter+1);
+        //
+        // var speed = Math.ceil(greatest/speedModifier);
+        var speed = 8000 - ((counter)**1.1) * 50;
+
+        return speed
+      }
+
+      function animateDiv($balloonCopy){
+        var newq = makeNewPosition();
+        var oldq = $balloonCopy.offset();
+        var speed = calcSpeed([oldq.top, oldq.left], newq, counter);
+        $balloonCopy.animate({ top: newq[0], left: newq[1] }, speed, function(){
+          animateDiv($balloonCopy);
+        });
+      };
+    };
+
+    window.setTimeout(function() {
+      $('.scoreboard').addClass('ready');
+      $('.replay').bind('click', function(e) {
+        e.preventDefault();
+        window.location.reload();
+      });
+    });
+
+    balloon.remove();  // remove the original balloon
+  </script>
+
+</html>
